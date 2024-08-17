@@ -1,0 +1,72 @@
+name: Build, Test, Lint, and Deploy to Dev AKS Cluster on PR
+
+on:
+  pull_request:
+    branches:
+      - main
+
+jobs:
+  build-test-lint-deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+
+      - name: Set up JDK 21
+        uses: actions/setup-java@v3
+        with:
+          distribution: 'temurin'
+          java-version: '21'
+
+      - name: Cache Maven dependencies
+        uses: actions/cache@v3
+        with:
+          path: ~/.m2/repository
+          key: ${{ runner.os }}-maven-${{ hashFiles('**/pom.xml') }}
+          restore-keys: |
+            ${{ runner.os }}-maven-
+
+      - name: Build and Test with Maven
+        run: mvn clean install
+        continue-on-error: false # Fail fast if tests fail
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v2
+        continue-on-error: false # Fail fast if Docker setup fails
+
+      - name: Lint Helm Chart
+        run: helm lint ./helm/product-service
+        continue-on-error: false # Fail fast if Helm chart has issues
+
+      - name: Log in to Azure Container Registry
+        run: echo "${{ secrets.DOCKER_PASSWORD }}" | docker login ${{ secrets.AZURE_CONTAINER_REGISTRY }} --username ${{ secrets.DOCKER_USERNAME }} --password-stdin
+        continue-on-error: false # Fail fast if login fails
+
+      - name: Build and Push Docker Image
+        run: |
+          docker build -t ${{ secrets.AZURE_CONTAINER_REGISTRY }}/product-service:${{ github.sha }} .
+          docker push ${{ secrets.AZURE_CONTAINER_REGISTRY }}/product-service:${{ github.sha }}
+        continue-on-error: false # Fail fast if Docker build/push fails
+
+      - name: Set up Azure CLI
+        uses: azure/login@v1
+        with:
+          creds: ${{ secrets.AZURE_CREDENTIALS }}
+        continue-on-error: false # Fail fast if Azure CLI setup fails
+
+      - name: Get AKS credentials for Dev Cluster
+        run: az aks get-credentials --resource-group ${{ secrets.DEV_AZURE_RESOURCE_GROUP }} --name ${{ secrets.DEV_AKS_CLUSTER_NAME }}
+        continue-on-error: false # Fail fast if AKS credentials setup fails
+
+      - name: Install Helm
+        uses: azure/setup-helm@v3
+        continue-on-error: false # Fail fast if Helm setup fails
+
+      - name: Deploy to Dev with Helm
+        run: |
+          helm upgrade --install product-service ./helm/product-service \
+            --set image.repository=${{ secrets.AZURE_CONTAINER_REGISTRY }}/product-service \
+            --set image.tag=${{ github.sha }} \
+            --set image.pullPolicy=Always
+        continue-on-error: false # Fail fast if deployment fails
