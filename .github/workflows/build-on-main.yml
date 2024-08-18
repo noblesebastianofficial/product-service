@@ -62,7 +62,7 @@ jobs:
 
       - name: Deploy with Helm
         run: |
-          helm upgrade --install product-service ./helm/product-service \ -n backend
+          helm upgrade --install product-service ./helm/product-service -n backend \
             --set image.repository=${{ secrets.AZURE_CONTAINER_REGISTRY }}/product-service \
             --set image.tag=latest \
             --set image.pullPolicy=Always
