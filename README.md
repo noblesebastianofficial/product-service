@@ -126,7 +126,13 @@ Microservice to manage products, offering CRUD operations such as Create Product
 ## API collection
 - Postman Collection: Available in the ./postman-collection directory
 
-
+## APIs
+- Create Product: /v1/products
+- Get All Products: /v1/products?page=0&size=10
+- Get Product By Id: /v1/products/{{product_id}}
+- Update Product: /v1/products
+- Delete Product: /v1/products/{{product_id}}
+  
 ## Test Coverage
 - Coverage: 100% for all classes except those under model and dto packages.
 - Tool: JaCoCo for generating coverage reports.
