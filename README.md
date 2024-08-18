@@ -53,7 +53,6 @@ Microservice to manage products, offering CRUD operations such as Create Product
        cd kubernetes
        kubectl apply -f secrets.yaml
        kubectl apply -f deployment.yaml
-       kubectl port-forward svc/product-service 8080:8080 -n backend
      ```
 
 3. Check Pod Status:
