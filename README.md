@@ -120,7 +120,7 @@ Microservice to manage products, offering CRUD operations such as Create Product
 ## Data Contract
 
 - OpenAPI Specification: Located at product-service-open-api.yaml.
-- Edit and View: Use Swagger Editor by pasting the YAML contents
+- Edit and View: Use Swagger Editor([swaggerEditor](https://editor.swagger.io)) by pasting the YAML contents
 
 
 ## API collection
