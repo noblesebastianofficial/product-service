@@ -16,7 +16,7 @@ Microservice to manage products, offering CRUD operations such as Create Product
 
 ## Application Architecture
 
-![Application Architecture](images/warehouse.jpg)
+![Application Architecture](images/product-service.png)
 
 ## Running the Application
 
