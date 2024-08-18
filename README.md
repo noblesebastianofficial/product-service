@@ -41,6 +41,7 @@ Microservice to manage products, offering CRUD operations such as Create Product
     ```bash
     docker container run  -p 8080:8080 -d  --rm --name product-service product-service:latest
     ```
+5. Test the Apllication using host http://localhost:8080
 ## Using Kubernetes
 1. Push Docker Image (if not done locally):
     ```bash
@@ -59,7 +60,7 @@ Microservice to manage products, offering CRUD operations such as Create Product
     ```bash
        kubectl get pods -n backend
     ```
-
+4. Test the Apllication using host http://product.example.com
 ## Using Helm in Kubernetes
 
 1. Build Docker Image:
@@ -75,7 +76,7 @@ Microservice to manage products, offering CRUD operations such as Create Product
     ```bash
        kubectl get pods -n backend
     ```
-
+4. Test the Apllication using host http://product.example.com
 ## Running on Azure Cloud
 
 1. Set Up Build Pipeline:
@@ -91,6 +92,7 @@ Microservice to manage products, offering CRUD operations such as Create Product
     ```bash
        kubectl get pods -n backend
       ```
+4. Test the Apllication using host http://product.example.com
 ## Running the application with IDE
 
 1. Clone or Download the Repository:
@@ -99,10 +101,16 @@ Microservice to manage products, offering CRUD operations such as Create Product
 2. Import Project in IntelliJ:
 
    - File -> Import -> Existing Maven Project -> Navigate to the project folder.
-3. Run the Application:
+3. Run mvn clean install(This step is mandatory for generating DTOs from openapi spec)
+    ```bash
+        mvn clean install -DskipTests=true 
+      ```
+4. Run the Application:
 
    - Find the class with @SpringBootApplication (e.g., ProductServiceApplication).
    Right-click and choose "Run".
+
+5. Test the Apllication using host http://localhost:8080.
 
      
 ## Health Check
