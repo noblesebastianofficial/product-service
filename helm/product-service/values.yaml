@@ -1,0 +1,77 @@
+namespace: backend
+productService:
+  name: product-service
+  image: product-service:latest
+  imagePullPolicy: IfNotPresent
+  replicas: 1
+  containerPort: 8080
+    # Probes for liveness and readiness
+  livenessProbe:
+    httpGet:
+      path: /product-service/actuator/health
+    initialDelaySeconds: 30  # Initial delay before the first probe is initiated
+    periodSeconds: 10
+    timeoutSeconds: 5
+    failureThreshold: 3
+
+  readinessProbe:
+    httpGet:
+      path: /product-service/actuator/health
+    initialDelaySeconds: 30  # Initial delay before the first readiness check is initiated
+    periodSeconds: 10
+    timeoutSeconds: 5
+    failureThreshold: 3
+  resources:
+    requests:
+      cpu: "100m"
+      memory: "256Mi"
+    limits:
+      cpu: "500m"
+      memory: "512Mi"
+
+postgres:
+  name: postgres
+  image: postgres:15
+  pvcSize: 10Gi
+  containerPort: 5432
+
+database:
+  url: jdbc:postgresql://postgres-service:5432/productdb
+  name: productdb
+
+secrets:
+  name: product-service-secrets
+
+hpa:
+  name: product-service-hpa
+  minReplicas: 1
+  maxReplicas: 5
+  cpuUtilization: 80
+
+
+istio:
+  enabled: true
+gateway:
+  name: webapp-gateway
+  port: 80
+  hosts:
+    - "product.example.com"
+
+virtualService:
+  name: product-service
+  hosts:
+    - "product.example.com"
+  gateway: webapp-gateway
+  route:
+    destination:
+      host: product-service.backend.svc.cluster.local
+      port: 80
+
+destinationRule:
+  name: product-service
+  host: product-service.backend.svc.cluster.local
+  tls:
+    mode: ISTIO_MUTUAL
+
+serviceAccount:
+  create: false

@@ -1,0 +1,149 @@
+{
+  "info": {
+    "_postman_id": "a9d8176c-ff4f-4ed5-af09-2174cba4192d",
+    "name": "ProductServiceAPI",
+    "description": "Collection of endpoints to interact with the Product Service.",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+    "_exporter_id": "14674015"
+  },
+  "item": [
+    {
+      "name": "Create Product",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"name\": \"New Product\",\n  \"description\": \"New Product Description\",\n  \"price\": 150.00\n}"
+        },
+        "url": {
+          "raw": "{{host}}:{{port}}/v1/products",
+          "host": [
+            "{{host}}"
+          ],
+          "port": "{{port}}",
+          "path": [
+            "v1",
+            "products"
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "Get All Products",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "var product_id = JSON.parse(responseBody)[0].id;",
+              "pm.environment.set(\"product_id\", product_id);"
+            ],
+            "type": "text/javascript",
+            "packages": {}
+          }
+        }
+      ],
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": {
+          "raw": "{{host}}:{{port}}/v1/products?page=0&size=10",
+          "host": [
+            "{{host}}"
+          ],
+          "port": "{{port}}",
+          "path": [
+            "v1",
+            "products"
+          ],
+          "query": [
+            {
+              "key": "page",
+              "value": "0"
+            },
+            {
+              "key": "size",
+              "value": "10"
+            }
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "Get Product By ID",
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": {
+          "raw": "{{host}}:{{port}}/v1/products/{{product_id}}",
+          "host": [
+            "{{host}}"
+          ],
+          "port": "{{port}}",
+          "path": [
+            "v1",
+            "products",
+            "{{product_id}}"
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "Update Product",
+      "request": {
+        "method": "PUT",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"id\": \"{{product_id}}\",\n  \"name\": \"Updated Product\",\n  \"description\": \"Updated Product Description\",\n  \"price\": 200.00\n}"
+        },
+        "url": {
+          "raw": "{{host}}:{{port}}/v1/products",
+          "host": [
+            "{{host}}"
+          ],
+          "port": "{{port}}",
+          "path": [
+            "v1",
+            "products"
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "Delete Product",
+      "request": {
+        "method": "DELETE",
+        "header": [],
+        "url": {
+          "raw": "{{host}}:{{port}}/v1/products/{{product_id}}",
+          "host": [
+            "{{host}}"
+          ],
+          "port": "{{port}}",
+          "path": [
+            "v1",
+            "products",
+            "{{product_id}}"
+          ]
+        }
+      },
+      "response": []
+    }
+  ]
+}

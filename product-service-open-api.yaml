@@ -1,0 +1,289 @@
+openapi: 3.0.3
+info:
+  title: Products Service API
+  description: API for product service Application
+  version: 1.0.1.0
+servers:
+  - url: http://localhost:8080/
+tags:
+  - name: Products
+    description: API information for Products API
+paths:
+  /v1/products:
+    get:
+      tags:
+        - Products
+      summary: Get All Products
+      operationId: getAllProducts
+      parameters:
+        - name: firstResult
+          in: query
+          description: Pagination of results. Specifies the index of the first result
+            to return.
+          required: false
+          schema:
+            type: integer
+            default: 0
+        - name: maxResults
+          in: query
+          description: Pagination of results. Specifies the maximum number of results
+            to return. Will return less results if there are no more results left.
+          required: false
+          schema:
+            type: integer
+            default: 10
+      responses:
+        '200':
+          description: Retrieved products successfully
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/ProductDto'
+        '400':
+          description: If one or more request parameters don't comply with the specification
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/BadRequest400Response'
+
+        '404':
+          description: Not Found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/NotFound404Response'
+        '500':
+          description: 'Internal Server Error'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error500Response'
+      x-codegen-request-body-name: ProductDto
+    post:
+      tags:
+        - Products
+      summary: Create New Product
+      operationId: createProduct
+      requestBody:
+        description: ProductDto
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ProductDto'
+        required: true
+      responses:
+        '200':
+          description: Product was created successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ProductDto'
+        '400':
+          description: If one or more request parameters don't comply with the specification
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/BadRequest400Response'
+
+        '404':
+          description: Not Found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/NotFound404Response'
+        '500':
+          description: 'Internal Server Error'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error500Response'
+      x-codegen-request-body-name: ProductDto
+    put:
+      tags:
+        - Products
+      summary: Update Product
+      operationId: updateProduct
+      requestBody:
+        description: ProductDto
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ProductDto'
+        required: true
+      responses:
+        '201':
+          description: The product was updated successfully.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ProductDto'
+        '400':
+          description: If one or more request parameters don't comply with the specification
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/BadRequest400Response'
+
+        '404':
+          description: Not Found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/NotFound404Response'
+        '500':
+          description: 'Internal Server Error'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error500Response'
+      x-codegen-request-body-name: ProductDto
+  /v1/products/{id}:
+    get:
+      tags:
+        - Products
+      summary: Get  Product By Id
+      operationId: getProductById
+      parameters:
+        - name: id
+          in: path
+          description: "The unique ID for a specific product"
+          required: true
+          schema:
+            type: string
+            format: uuid
+            pattern: "^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}$"
+      responses:
+        '200':
+          description: The product was found successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ProductDto'
+        '400':
+          description: If one or more request parameters don't comply with the specification
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/BadRequest400Response'
+
+        '404':
+          description: Not Found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/NotFound404Response'
+        '500':
+          description: 'Internal Server Error'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error500Response'
+      x-codegen-request-body-name: ProductDto
+    delete:
+      tags:
+        - Products
+      summary: Delete Product
+      operationId: deleteProduct
+      parameters:
+        - name: id
+          in: path
+          description: "The unique ID for a specific product"
+          required: true
+          schema:
+            type: string
+            format: uuid
+            pattern: "^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}$"
+      responses:
+        '200':
+          description: The Product was deleted successfully
+        '400':
+          description: Bad Request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/BadRequest400Response'
+
+        '404':
+          description: Not Found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/NotFound404Response'
+      x-codegen-request-body-name: ProductDto
+
+components:
+  schemas:
+
+    ProductDto:
+      title: ProductDto
+      required:
+        - name
+        - description
+        - price
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+          pattern: "^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}$"
+          description: The product id
+          example: e10c3360-1d12-4c73-b9f4-cf14924625d5
+        name:
+          type: string
+          description: The product name
+          example: Table
+        description:
+          type: string
+          example: Green table
+        price:
+          type: number
+          format: big decimal
+          minimum: 0
+          example: 5.0
+
+    InternalServerError:
+      description: Error Objects may differ depending on the underlying services or issues encountered
+      type: object
+      example:
+        message: Varying Error messages
+    NotFound404Response:
+      type: object
+      properties:
+        error:
+          type: array
+          items:
+            $ref: '#/components/schemas/NotFoundError'
+    NotFoundError:
+      type: object
+      properties:
+        code:
+          type: string
+          example: 404 NOT_FOUND
+        message:
+          type: string
+          example: The object you're trying to find doesn't seem to exist.
+    BadRequest400Response:
+      type: object
+      properties:
+        error:
+          type: array
+          items:
+            $ref: '#/components/schemas/BadRequestError'
+    BadRequestError:
+      type: object
+      properties:
+        code:
+          type: string
+          example: 400 Bad Request
+        message:
+          type: string
+          example: The request the user made is incorrect or corrupt, and the server can't understand it.
+    Error500Response:
+      type: object
+      properties:
+        error:
+          type: array
+          items:
+            $ref: '#/components/schemas/InternalServerError'

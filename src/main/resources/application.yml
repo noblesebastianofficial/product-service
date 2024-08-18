@@ -1,0 +1,20 @@
+spring:
+  application:
+    name: product-service
+
+server:
+  port: 8080
+
+logging:
+  level:
+    root: INFO
+
+management:
+  endpoints:
+    web:
+      base-path: /product-service/actuator
+      exposure:
+        include: "*"
+
+    jackson:
+      isolated-object-mapper: false

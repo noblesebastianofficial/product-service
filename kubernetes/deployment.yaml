@@ -1,0 +1,220 @@
+# Source: product-service/templates/namespace.yml
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: backend
+---
+# Source: product-service/templates/postgres-pvc.yaml
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: postgres-pvc
+  namespace: backend
+spec:
+  accessModes:
+    - ReadWriteOnce
+  resources:
+    requests:
+      storage: 10Gi
+---
+# Source: product-service/templates/postgres-service.yaml
+apiVersion: v1
+kind: Service
+metadata:
+  name: postgres-service
+  namespace: backend
+  labels:
+    app: postgres
+spec:
+  ports:
+    - port: 5432
+  selector:
+    app: postgres
+---
+# Source: product-service/templates/service.yaml
+apiVersion: v1
+kind: Service
+metadata:
+  name: product-service
+  namespace: backend
+  labels:
+    app: product-service
+spec:
+  ports:
+    - port: 80
+      targetPort: 8080
+  selector:
+    app: product-service
+---
+# Source: product-service/templates/deployment.yaml
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: product-service
+  namespace: backend
+  labels:
+    app: product-service
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: product-service
+  template:
+    metadata:
+      labels:
+        app: product-service
+      annotations:
+        sidecar.istio.io/inject: ""
+    spec:
+      containers:
+        - name: product-service
+          image: product-service:latest
+          imagePullPolicy: IfNotPresent
+          ports:
+            - containerPort: 8080
+          resources:
+            requests:
+              cpu: 100m
+              memory: 256Mi
+            limits:
+              cpu: 500m
+              memory: 512Mi
+          env:
+            - name: DATABASE_URL
+              value: jdbc:postgresql://postgres-service:5432/productdb
+            - name: DATABASE_USERNAME
+              valueFrom:
+                secretKeyRef:
+                  name: product-service-secrets
+                  key: DATABASE_USERNAME
+            - name: DATABASE_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: product-service-secrets
+                  key: DATABASE_PASSWORD
+          livenessProbe:
+            httpGet:
+              path: /product-service/actuator/health
+              port: 8080
+            initialDelaySeconds: 30
+            periodSeconds: 10
+            timeoutSeconds: 5
+            failureThreshold: 3
+
+          readinessProbe:
+            httpGet:
+              path: /product-service/actuator/health
+              port: 8080
+            initialDelaySeconds: 30
+            periodSeconds: 10
+            timeoutSeconds: 5
+            failureThreshold: 3
+---
+# Source: product-service/templates/postgres-deployment.yaml
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: postgres
+  namespace: backend
+  labels:
+    app: postgres
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: postgres
+  template:
+    metadata:
+      labels:
+        app: postgres
+    spec:
+      containers:
+        - name: postgres
+          image: postgres:15
+          env:
+            - name: POSTGRES_DB
+              value: productdb
+            - name: POSTGRES_USER
+              valueFrom:
+                secretKeyRef:
+                  name: product-service-secrets
+                  key: DATABASE_USERNAME
+            - name: POSTGRES_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: product-service-secrets
+                  key: DATABASE_PASSWORD
+          ports:
+            - containerPort: 5432
+          volumeMounts:
+            - name: postgres-data
+              mountPath: /var/lib/postgresql/data
+      volumes:
+        - name: postgres-data
+          persistentVolumeClaim:
+            claimName: postgres-pvc
+---
+# Source: product-service/templates/hpa.yaml
+apiVersion: autoscaling/v1
+kind: HorizontalPodAutoscaler
+metadata:
+  name: product-service-hpa
+  namespace: backend
+spec:
+  scaleTargetRef:
+    apiVersion: apps/v1
+    kind: Deployment
+    name: product-service
+  minReplicas: 1
+  maxReplicas: 5
+  targetCPUUtilizationPercentage: 80
+---
+# Source: product-service/templates/destinationrule.yaml
+apiVersion: networking.istio.io/v1beta1
+kind: DestinationRule
+metadata:
+  name: product-service
+  namespace: backend
+spec:
+  host: product-service.backend.svc.cluster.local
+  trafficPolicy:
+    tls:
+      mode: ISTIO_MUTUAL
+---
+# Source: product-service/templates/gateway.yaml
+apiVersion: networking.istio.io/v1beta1
+kind: Gateway
+metadata:
+  name: webapp-gateway
+  namespace: backend
+spec:
+  selector:
+    istio: ingressgateway # Use Istio's default ingress gateway
+  servers:
+    - port:
+        number: 80
+        name: http
+        protocol: HTTP
+      hosts:
+        - product.example.com
+---
+# Source: product-service/templates/virtualservice.yaml
+apiVersion: networking.istio.io/v1beta1
+kind: VirtualService
+metadata:
+  name: product-service
+  namespace: backend
+spec:
+  hosts:
+    - product.example.com
+  gateways:
+    - webapp-gateway
+  http:
+    - match:
+        - uri:
+            prefix: /
+      route:
+        - destination:
+            host:  product-service.backend.svc.cluster.local
+            port:
+              number: 80

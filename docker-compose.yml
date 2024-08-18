@@ -1,0 +1,53 @@
+version: '3.8'
+
+services:
+  product-service:
+    image: product-service:latest  # Replace with your built image name
+    build:
+      context: .  # Assuming Dockerfile is in the same directory as this compose file
+    ports:
+      - "8080:8080"  # Maps the container's port 8080 to port 8080 on the host
+    environment:
+      SPRING_DATASOURCE_URL: jdbc:postgresql://db:5432/productdb
+      SPRING_DATASOURCE_USERNAME: root
+      SPRING_DATASOURCE_PASSWORD: root
+      SPRING_JPA_HIBERNATE_DDL_AUTO: update
+      SPRING_JPA_SHOW_SQL: "true"
+      SPRING_DATASOURCE_DRIVER_CLASS_NAME: org.postgresql.Driver
+    depends_on:
+      db:
+        condition: service_healthy  # Ensure db is healthy before starting product-service
+    networks:
+      - prod-network
+    healthcheck:
+      test: ["CMD-SHELL", "curl --silent --fail http://localhost:9091/actuator/health || exit 1"]
+      interval: 30s
+      retries: 3
+      start_period: 30s
+      timeout: 10s
+
+  db:
+    image: postgres:15
+    environment:
+      POSTGRES_DB: productdb
+      POSTGRES_USER: root
+      POSTGRES_PASSWORD: root
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    networks:
+      - prod-network
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U root"]
+      interval: 30s
+      retries: 3
+      start_period: 30s
+      timeout: 10s
+
+volumes:
+  postgres_data:  # Named volume for persisting database data
+
+networks:
+  prod-network:
+    driver: bridge
