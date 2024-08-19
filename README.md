@@ -37,45 +37,59 @@ Microservice to manage products, offering CRUD operations such as Create Product
     ```bash
      docker build --rm -f "Dockerfile" -t product-service:latest "."
     ```
-4. Run Docker Containe
+4. **Run Docker Container**
     ```bash
     docker container run  -p 8080:8080 -d  --rm --name product-service product-service:latest
     ```
 5. Test the Apllication using host http://localhost:8080
 ## Using Kubernetes
-1. Push Docker Image (if not done locally):
+1. start Colima:
+    ```bash
+    colima start --kubernetes --network-address --cpu 4 --memory 16 --mount $HOME:w
+    
+    ```
+2. Build Docker Image:
+    ```bash
+     docker build --rm -f "Dockerfile" -t product-service:latest "."
+    ```
+3. Push Docker Image (if not done locally):
     ```bash
      docker push <your-docker-registry>/product-service:latest
     ```
 
-2. Deploy the image to kubernetics pod using apply command 
+4. Deploy the image to kubernetics pod using apply command 
     ```bash
        cd kubernetes
        kubectl apply -f secrets.yaml
        kubectl apply -f deployment.yaml
      ```
 
-3. Check Pod Status:
+5. Check Pod Status:
     ```bash
        kubectl get pods -n backend
     ```
-4. Test the Apllication using host http://product.example.com
+6. Test the Apllication using host http://product.example.com
 ## Using Helm in Kubernetes
+1. start Colima:
+    ```bash
+    colima start --kubernetes --network-address --cpu 4 --memory 16 --mount $HOME:w
+    
+    ```
 
-1. Build Docker Image:
+2. Build Docker Image:
     ```bash
      docker build --rm -f "Dockerfile" -t product-service:latest "."
     ```
-2. Deploy Using Helm:
+3. Deploy Using Helm:
     ```bash
        helm install product-service ./helm/product-service -n backend
        helm upgrade product-service ./helm/product-service -n backend
      ```
-3. Check Pod Status:
+4. Check Pod Status:
     ```bash
        kubectl get pods -n backend
     ```
-4. Test the Apllication using host http://product.example.com
+5. Test the Apllication using host http://product.example.com
 ## Running on Azure Cloud
 
 1. Set Up Build Pipeline:
