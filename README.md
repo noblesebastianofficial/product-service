@@ -24,7 +24,7 @@ Microservice to manage products, offering CRUD operations such as Create Product
 1. **Clone or Download the Repository**:
 
    - Download the zip or clone the Git repository.
-   - Go to paranet folder **product-service**.
+   - Go to paranet folder.
 
 2. **Install Colima and Docker**:
    ```bash
@@ -50,7 +50,7 @@ Microservice to manage products, offering CRUD operations such as Create Product
 1. Clone or Download the Repository:
 
    - Download the zip or clone the Git repository.
-   - Go to paranet folder **product-service**.
+   - Go to paranet folder .
 2. start Colima:
     ```bash
     colima start --kubernetes --network-address --cpu 4 --memory 16 --mount $HOME:w
@@ -81,7 +81,7 @@ Microservice to manage products, offering CRUD operations such as Create Product
 1. Clone or Download the Repository:
 
    - Download the zip or clone the Git repository.
-   - Go to paranet folder **product-service**.
+   - Go to paranet folder.
 2. start Colima:
     ```bash
     colima start --kubernetes --network-address --cpu 4 --memory 16 --mount $HOME:w
